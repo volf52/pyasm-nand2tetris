@@ -43,11 +43,11 @@ jobs:
       - name: Run tests (pytest)
         run: poetry run pytest
 
-#      - name: Build package (using poetry)
-#        run: poetry build
-#
-#      - name: Upload artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: pyasm
-#          path: dist/*
+      - name: Build package (using poetry)
+        run: poetry build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pyasm
+          path: dist/*
