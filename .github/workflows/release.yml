@@ -65,7 +65,7 @@ jobs:
 
       - name: Echo tag
         id: echo_tag
-        run: ${{ steps.get_version.outputs.VERSION }}
+        run: echo ${{ steps.get_version.outputs.VERSION }}
 
       - name: Upload tar file
         id: upload-release-asset
@@ -74,6 +74,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/pyasm-*.tar.gz
-          asset_name: pyasm.tar.gz
+          asset_path: dist/pyasm-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          asset_name: pyasm-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_content_type: application/gzip
