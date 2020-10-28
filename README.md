@@ -1,5 +1,5 @@
 # pyasm-nand2tetris
 
-![.github/workflows/ci.yml](https://github.com/volf52/pyasm-nand2tetris/workflows/.github/workflows/ci.yml/badge.svg?branch=main)
+![Run Python Tests](https://github.com/volf52/pyasm-nand2tetris/workflows/Run%20Python%20Tests/badge.svg?branch=main)
 
 ASM Assembler for the "Hack" Architecture from Nand2Tetris
