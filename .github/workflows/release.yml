@@ -78,8 +78,8 @@ jobs:
           asset_name: pyasm-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_content_type: application/gzip
 
-      - name: Upload tar file
-          id: upload-release-asset
+      - name: Upload wheel file
+          id: upload-wheel-file
           uses: actions/upload-release-asset@v1
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
