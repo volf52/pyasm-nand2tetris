@@ -41,4 +41,4 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Run tests (pytest)
-        run: poetry run pytest
+        run: poetry run pytest -n auto tests

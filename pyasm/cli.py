@@ -1,6 +1,12 @@
+import typer
+
+cli = typer.Typer()
+
+
+@cli.command(name="hello")
 def hello():
-    return "hello world!"
+    typer.echo("Hello there")
 
 
 if __name__ == "__main__":
-    print(hello())
+    cli()
