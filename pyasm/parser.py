@@ -1,7 +1,7 @@
 import re
 from enum import Enum
-from typing import List, Optional
 from functools import lru_cache
+from typing import List, Optional
 
 
 class CommandType(Enum):
@@ -27,21 +27,35 @@ def generate_possible_c_commands():
         "-1",
         "D",
         "A",
+        "M",
         "!D",
         "!A",
+        "!M",
         "-D",
         "-A",
+        "-M",
         "D+1",
         "A+1",
+        "M+1",
         "D-1",
         "A-1",
+        "M-1",
         "D+A",
         "D-A",
+        "D+M",
+        "M+D",
+        "D-M",
+        "M-D",
         "A+D",
         "A-D",
         "D&A",
         "A&D",
         "A|D",
+        "D|A",
+        "D&M",
+        "M&D",
+        "M|D",
+        "D|M",
     ]
 
     possible_dests = ["M", "D", "MD", "A", "AM", "AD", "AMD"]
@@ -135,7 +149,7 @@ class Parser:
     def current_command(self) -> str:
         if not self.has_more_commands():
             raise ValueError("No more commands")
-        
+
         return self.__lines[self.__counter]
 
     def command_type(self, command: str) -> CommandType:
@@ -156,7 +170,7 @@ class Parser:
 
                 equal_sign_present = "=" in command
                 semicolon_present = ";" in command
-                split = re.split('=|;', command)
+                split = re.split("=|;", command)
                 if len(split) in (2, 3):
                     self.__curr_command_type = CommandType.C_COMMAND
                     if equal_sign_present:
