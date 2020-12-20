@@ -1,8 +1,9 @@
-import pytest
-from pyasm.parser import Parser, InvalidCommandException, CommandType
 from functools import lru_cache
-
 from pathlib import Path
+
+import pytest
+
+from pyasm.parser import CommandType, InvalidCommandException, Parser
 
 
 def generate_valid_parser():
@@ -107,21 +108,35 @@ def get_possible_c_commands():
         "-1",
         "D",
         "A",
+        "M",
         "!D",
         "!A",
+        "!M",
         "-D",
         "-A",
+        "-M",
         "D+1",
         "A+1",
+        "M+1",
         "D-1",
         "A-1",
+        "M-1",
         "D+A",
         "D-A",
+        "D+M",
+        "M+D",
+        "D-M",
+        "M-D",
         "A+D",
         "A-D",
         "D&A",
         "A&D",
         "A|D",
+        "D|A",
+        "D&M",
+        "M&D",
+        "M|D",
+        "D|M",
     ]
 
     possible_dests = ["M", "D", "MD", "A", "AM", "AD", "AMD"]
@@ -161,7 +176,8 @@ def test_invalid_commands(parser: Parser, command: str):
         parser.command_type(command)
 
 
-@pytest.mark.integtest
+@pytest.mark.integ_test
+@pytest.mark.integ_parser
 def test_parser_with_proper_code():
     code = (
         "// this is a comment\n\n\n // Another comment //  \n"
@@ -226,3 +242,378 @@ def test_parser_with_proper_code():
     assert not parser.has_more_commands()
     with pytest.raises(ValueError):
         _ = parser.current_command
+
+
+def load_file(name: str):
+    return Path(__file__).parent.joinpath(name).read_text()
+
+
+@pytest.mark.integ_test
+@pytest.mark.integ_parser
+def test_parser_with_add_asm_file():
+    code = load_file("Add.asm")
+    parser = Parser(code)
+
+    expected_commands = ["@2", "D=A", "@3", "D=D+A", "@0", "M=D"]
+    expected_types = [
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+    ]
+    expected_symbols = ["2", None, "3", None, "0", None]
+    expected_dest = [None, "D", None, "D", None, "M"]
+    expected_comp = [None, "A", None, "D+A", None, "D"]
+
+    zip_obj = zip(
+        expected_commands,
+        expected_types,
+        expected_symbols,
+        expected_dest,
+        expected_comp,
+    )
+
+    for i, (command, tp, symbol, dest, comp) in enumerate(zip_obj):
+        assert parser.has_more_commands()
+        assert parser.counter == i
+        comm = parser.current_command
+        assert comm == command
+        assert parser.command_type(comm) == tp
+        if symbol is None:
+            assert parser.dest == dest
+            assert parser.comp == comp
+            assert parser.jmp == ""
+            with pytest.raises(ValueError):
+                _ = parser.symbol
+        else:
+            assert parser.symbol == symbol
+            with pytest.raises(ValueError):
+                _ = parser.dest
+                _ = parser.comp
+                _ = parser.jmp
+
+        parser.advance()
+
+    assert parser.counter == 6
+    assert not parser.has_more_commands()
+
+
+@pytest.mark.integ_test
+@pytest.mark.integ_parser
+def test_parser_with_max_L_asm_file():
+    code = load_file("MaxL.asm")
+    parser = Parser(code)
+
+    expected_commands = [
+        "@0",
+        "D=M",
+        "@1",
+        "D=D-M",
+        "@10",
+        "D;JGT",
+        "@1",
+        "D=M",
+        "@12",
+        "0;JMP",
+        "@0",
+        "D=M",
+        "@2",
+        "M=D",
+        "@14",
+        "0;JMP",
+    ]
+    expected_types = [
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+    ]
+    expected_symbols = [
+        "0",
+        None,
+        "1",
+        None,
+        "10",
+        None,
+        "1",
+        None,
+        "12",
+        None,
+        "0",
+        None,
+        "2",
+        None,
+        "14",
+        None,
+    ]
+    expected_dest = expected_dest = [
+        None,
+        "D",
+        None,
+        "D",
+        None,
+        "",
+        None,
+        "D",
+        None,
+        "",
+        None,
+        "D",
+        None,
+        "M",
+        None,
+        "",
+    ]
+
+    expected_comp = [
+        None,
+        "M",
+        None,
+        "D-M",
+        None,
+        "D",
+        None,
+        "M",
+        None,
+        "0",
+        None,
+        "M",
+        None,
+        "D",
+        None,
+        "0",
+    ]
+
+    expected_jmp = [
+        None,
+        "",
+        None,
+        "",
+        None,
+        "JGT",
+        None,
+        "",
+        None,
+        "JMP",
+        None,
+        "",
+        None,
+        "",
+        None,
+        "JMP",
+    ]
+
+    zip_obj = zip(
+        expected_commands,
+        expected_types,
+        expected_symbols,
+        expected_dest,
+        expected_comp,
+        expected_jmp,
+    )
+
+    for i, (command, tp, symbol, dest, comp, jmp) in enumerate(zip_obj):
+        assert parser.has_more_commands()
+        assert parser.counter == i
+        comm = parser.current_command
+        assert comm == command
+        assert parser.command_type(comm) == tp
+        if symbol is None:
+            assert parser.dest == dest
+            assert parser.comp == comp
+            assert parser.jmp == jmp
+            with pytest.raises(ValueError):
+                _ = parser.symbol
+        else:
+            assert parser.symbol == symbol
+            with pytest.raises(ValueError):
+                _ = parser.dest
+                _ = parser.comp
+                _ = parser.jmp
+
+        parser.advance()
+
+    assert parser.counter == 16
+    assert not parser.has_more_commands()
+
+
+@pytest.mark.integ_test
+@pytest.mark.integ_parser
+def test_parser_with_max_asm_file():
+    code = load_file("Max.asm")
+    parser = Parser(code)
+
+    expected_commands = [
+        "@R0",
+        "D=M",
+        "@R1",
+        "D=D-M",
+        "@OUTPUT_FIRST",
+        "D;JGT",
+        "@R1",
+        "D=M",
+        "@OUTPUT_D",
+        "0;JMP",
+        "(OUTPUT_FIRST)",
+        "@R0",
+        "D=M",
+        "(OUTPUT_D)",
+        "@R2",
+        "M=D",
+        "(INFINITE_LOOP)",
+        "@INFINITE_LOOP",
+        "0;JMP",
+    ]
+    expected_types = [
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.L_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.L_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+        CommandType.L_COMMAND,
+        CommandType.A_COMMAND,
+        CommandType.C_COMMAND,
+    ]
+    expected_symbols = [
+        "R0",
+        None,
+        "R1",
+        None,
+        "OUTPUT_FIRST",
+        None,
+        "R1",
+        None,
+        "OUTPUT_D",
+        None,
+        "OUTPUT_FIRST",
+        "R0",
+        None,
+        "OUTPUT_D",
+        "R2",
+        None,
+        "INFINITE_LOOP",
+        "INFINITE_LOOP",
+        None,
+    ]
+    expected_dest = [
+        None,
+        "D",
+        None,
+        "D",
+        None,
+        "",
+        None,
+        "D",
+        None,
+        "",
+        None,
+        None,
+        "D",
+        None,
+        None,
+        "M",
+        None,
+        None,
+        "",
+    ]
+    expected_comp = [
+        None,
+        "M",
+        None,
+        "D-M",
+        None,
+        "D",
+        None,
+        "M",
+        None,
+        "0",
+        None,
+        None,
+        "M",
+        None,
+        None,
+        "D",
+        None,
+        None,
+        "0",
+    ]
+
+    expected_jmp = [
+        None,
+        "",
+        None,
+        "",
+        None,
+        "JGT",
+        None,
+        "",
+        None,
+        "JMP",
+        None,
+        None,
+        "",
+        None,
+        None,
+        "",
+        None,
+        None,
+        "JMP",
+    ]
+
+    zip_obj = zip(
+        expected_commands,
+        expected_types,
+        expected_symbols,
+        expected_dest,
+        expected_comp,
+        expected_jmp,
+    )
+
+    for i, (command, tp, symbol, dest, comp, jmp) in enumerate(zip_obj):
+        assert parser.has_more_commands()
+        assert parser.counter == i
+        comm = parser.current_command
+        assert comm == command
+        assert parser.command_type(comm) == tp
+        if symbol is None:
+            assert parser.dest == dest
+            assert parser.comp == comp
+            assert parser.jmp == jmp
+            with pytest.raises(ValueError):
+                _ = parser.symbol
+        else:
+            assert parser.symbol == symbol
+            with pytest.raises(ValueError):
+                _ = parser.dest
+                _ = parser.comp
+                _ = parser.jmp
+
+        parser.advance()
+
+    assert parser.counter == 19
+    assert not parser.has_more_commands()
