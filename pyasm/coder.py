@@ -139,10 +139,15 @@ class SymbolTable:
         "kbd": 24576,
     }
 
-    __slots__ = "__lookup_table"
+    __slots__ = "__lookup_table", "__counter"
 
     def __init__(self):
         self.__lookup_table = {}
+        self.__counter = 16
+
+    def add_variable(self, variable: str) -> None:
+        self.__lookup_table.__setitem__(variable, self.__counter)
+        self.__counter += 1
 
     def __setitem__(self, key: str, value: int) -> None:
         if key.lower() in SymbolTable.__RESERVED:
@@ -169,6 +174,7 @@ class SymbolTable:
 
     def clear(self) -> None:
         self.__lookup_table.clear()
+        self.__counter = 16
 
     def delete(self, symbol: str) -> bool:
         if symbol.lower() in SymbolTable.__RESERVED:
