@@ -131,6 +131,7 @@ def test_getting_reserved_symbols(symbol_table: SymbolTable):
 
 
 @pytest.mark.integ_test
+@pytest.mark.integ_sym_table
 def test_setting_and_getting_symbol_table_entries_():
     symbol_table = SymbolTable()
 
@@ -163,6 +164,16 @@ def test_setting_and_getting_symbol_table_entries_():
     assert symbol_table["end"] == 147
     symbol_table["something_else"] = 123
     assert len(symbol_table) == 2
+
+    symbol_table.add_variable('someLoop')
+    assert symbol_table["someLoop"] == 16
+    symbol_table["someLoop"] = 27
+    assert symbol_table["someLoop"] == 27
+    symbol_table.add_variable('SomeLoop')
+    assert symbol_table["someLoop"] == 27  # Case sensitive
+    assert symbol_table['SomeLoop'] == 17
+    symbol_table["something_else"] = 123
+    assert len(symbol_table) == 4
 
     symbol_table.clear()
     assert len(symbol_table) == 0
