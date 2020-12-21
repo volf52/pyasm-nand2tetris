@@ -102,7 +102,6 @@ class Parser:
 
     __slots__ = (
         "__raw_txt",
-        "__log",
         "__lines",
         "__counter",
         "__num_lines",
@@ -113,9 +112,8 @@ class Parser:
         "__jmp",
     )
 
-    def __init__(self, raw_text: str, /, *, log_func=print):
+    def __init__(self, raw_text: str):
         self.__raw_txt = raw_text
-        self.__log = log_func
         self.__counter = 0
 
         self.__lines: List[str] = Parser.process(raw_text)
