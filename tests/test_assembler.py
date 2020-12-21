@@ -34,18 +34,20 @@ def test_assembler_with_add():
 
 
 def load_file(name: str):
-    return Path(__file__).parent.joinpath(name).read_text()
+    return (
+        Path(__file__).parent.joinpath("asm_files").joinpath(name).read_text()
+    )
 
 
 @pytest.mark.integ_test
 @pytest.mark.integ_assembler
 def test_assembler_with_add_file():
-    code = load_file('Add.asm')
+    code = load_file("Add.asm")
     parser = Parser(code)
     assembler = Assembler(parser)
 
     output = assembler.assemble()
-    expected = load_file('Add.hack').splitlines()
+    expected = load_file("Add.hack").splitlines()
 
     assert output == expected
 
@@ -53,12 +55,12 @@ def test_assembler_with_add_file():
 @pytest.mark.integ_test
 @pytest.mark.integ_assembler
 def test_assembler_with_max_file():
-    code = load_file('Max.asm')
+    code = load_file("Max.asm")
     parser = Parser(code)
     assembler = Assembler(parser)
 
     output = assembler.assemble()
-    expected = load_file('Max.hack').splitlines()
+    expected = load_file("Max.hack").splitlines()
 
     assert output == expected
 
@@ -66,11 +68,11 @@ def test_assembler_with_max_file():
 @pytest.mark.integ_test
 @pytest.mark.integ_assembler
 def test_assembler_with_max_l_file():
-    code = load_file('MaxL.asm')
+    code = load_file("MaxL.asm")
     parser = Parser(code)
     assembler = Assembler(parser)
 
     output = assembler.assemble()
-    expected = load_file('MaxL.hack').splitlines()
+    expected = load_file("MaxL.hack").splitlines()
 
     assert output == expected

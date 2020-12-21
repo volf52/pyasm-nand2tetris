@@ -264,7 +264,9 @@ def test_parser_with_proper_code():
 
 
 def load_file(name: str):
-    return Path(__file__).parent.joinpath(name).read_text()
+    return (
+        Path(__file__).parent.joinpath("asm_files").joinpath(name).read_text()
+    )
 
 
 @pytest.mark.integ_test
