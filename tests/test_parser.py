@@ -139,7 +139,23 @@ def get_possible_c_commands():
         "D|M",
     ]
 
-    possible_dests = ["M", "D", "MD", "A", "AM", "AD", "AMD"]
+    possible_dests = [
+        "M",
+        "D",
+        "MD",
+        "DM",
+        "A",
+        "AM",
+        "MA",
+        "AD",
+        "DA",
+        "AMD",
+        "ADM",
+        "MAD",
+        "MDA",
+        "DAM",
+        "DMA",
+    ]
     possible_jmps = ["JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP"]
 
     result = []
