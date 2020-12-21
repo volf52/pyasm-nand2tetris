@@ -148,6 +148,10 @@ class Parser:
         self.__dest = ""
         self.__jmp = ""
 
+    def reset(self) -> None:
+        self._reset_counter()
+        self._reset_symbols()
+
     def has_more_commands(self) -> bool:
         return self.__counter < self.__num_lines
 
