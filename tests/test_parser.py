@@ -206,6 +206,7 @@ def test_parser_with_proper_code():
             getattr(parser, attrib)
 
     assert parser.counter == 0
+    assert parser.line_idx == 0
     assert parser.has_more_commands()
     command = parser.current_command
     assert parser.command_type(command) == CommandType.A_COMMAND
@@ -218,6 +219,7 @@ def test_parser_with_proper_code():
     parser.advance()
 
     assert parser.counter == 1
+    assert parser.line_idx == 1
     assert parser.has_more_commands()
     command = parser.current_command
     assert parser.command_type(command) == CommandType.C_COMMAND
@@ -230,6 +232,7 @@ def test_parser_with_proper_code():
     parser.advance()
 
     assert parser.counter == 2
+    assert parser.line_idx == 2
     assert parser.has_more_commands()
     command = parser.current_command
     assert parser.command_type(command) == CommandType.L_COMMAND
@@ -242,6 +245,7 @@ def test_parser_with_proper_code():
     parser.advance()
 
     assert parser.counter == 3
+    assert parser.line_idx == 2
     assert parser.has_more_commands()
     command = parser.current_command
     assert parser.command_type(command) == CommandType.C_COMMAND
@@ -253,6 +257,7 @@ def test_parser_with_proper_code():
 
     parser.advance()
     assert parser.counter == 4
+    assert parser.line_idx == 3
     assert not parser.has_more_commands()
     with pytest.raises(ValueError):
         _ = parser.current_command

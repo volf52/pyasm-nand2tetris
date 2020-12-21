@@ -104,6 +104,7 @@ class Parser:
         "__raw_txt",
         "__lines",
         "__counter",
+        "__line_idx",
         "__num_lines",
         "__symbol",
         "__curr_command_type",
@@ -115,6 +116,7 @@ class Parser:
     def __init__(self, raw_text: str):
         self.__raw_txt = raw_text
         self.__counter = 0
+        self.__line_idx = 0
 
         self.__lines: List[str] = Parser.process(raw_text)
         self.__num_lines = len(self.__lines)
@@ -138,8 +140,9 @@ class Parser:
 
         return [x.strip() for x in txt.splitlines()]
 
-    def _reset_counter(self) -> None:
+    def _reset_counters(self) -> None:
         self.__counter = 0
+        self.__line_idx = 0
 
     def _reset_symbols(self) -> None:
         self.__curr_command_type = None
@@ -149,7 +152,7 @@ class Parser:
         self.__jmp = ""
 
     def reset(self) -> None:
-        self._reset_counter()
+        self._reset_counters()
         self._reset_symbols()
 
     def has_more_commands(self) -> bool:
@@ -158,10 +161,16 @@ class Parser:
     def advance(self) -> None:
         if self.has_more_commands():
             self.__counter += 1
+            if self.__curr_command_type is not CommandType.L_COMMAND:
+                self.__line_idx += 1
 
     @property
     def counter(self):
         return self.__counter
+
+    @property
+    def line_idx(self):
+        return self.__line_idx
 
     @property
     def current_command(self) -> str:
