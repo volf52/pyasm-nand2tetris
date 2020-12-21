@@ -174,14 +174,12 @@ def get_possible_c_commands():
 possible_c_commands = get_possible_c_commands()
 
 
-@pytest.mark.parametrize("command,dest,comp,jmp", possible_c_commands)
-def test_valid_c_commands(
-    parser: Parser, command: str, dest: str, comp: str, jmp: str
-):
-    assert parser.command_type(command) is CommandType.C_COMMAND
-    assert parser.comp == comp
-    assert parser.dest == dest
-    assert parser.jmp == jmp
+def test_valid_c_commands(parser: Parser):
+    for command, dest, comp, jmp in possible_c_commands:
+        assert parser.command_type(command) is CommandType.C_COMMAND
+        assert parser.comp == comp
+        assert parser.dest == dest
+        assert parser.jmp == jmp
 
 
 @pytest.mark.parametrize(
