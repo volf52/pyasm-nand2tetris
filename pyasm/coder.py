@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 TranslationTable = Dict[str, str]
 
@@ -110,3 +110,73 @@ class Coder:
     @staticmethod
     def translate_jmp(mnemonic: str) -> str:
         return Coder.__get_mnemonic(mnemonic, Coder.__JMP, "jmp")
+
+
+class SymbolTable:
+    __RESERVED = {
+        "r0": 0,
+        "r1": 1,
+        "r2": 2,
+        "r3": 3,
+        "r4": 4,
+        "r5": 5,
+        "r6": 6,
+        "r7": 7,
+        "r8": 8,
+        "r9": 9,
+        "r10": 10,
+        "r11": 11,
+        "r12": 12,
+        "r13": 13,
+        "r14": 14,
+        "r15": 15,
+        "sp": 0,
+        "lcl": 1,
+        "arg": 2,
+        "this": 3,
+        "that": 4,
+        "screen": 16384,
+        "kbd": 24576,
+    }
+
+    __slots__ = "__lookup_table"
+
+    def __init__(self):
+        self.__lookup_table = {}
+
+    def __setitem__(self, key: str, value: int) -> None:
+        if key.lower() in SymbolTable.__RESERVED:
+            raise ValueError(f"Cannot set a reserved symbol. {key}")
+
+        self.__lookup_table[key] = value
+
+    def __getitem__(self, key: str):
+        reserved = SymbolTable.__RESERVED.get(key.lower())
+        if reserved is not None:
+            return reserved
+
+        return self.__lookup_table[key]
+
+    def get(self, key: str, default=None) -> Optional[int]:
+        reserved = SymbolTable.__RESERVED.get(key.lower())
+        if reserved is not None:
+            return reserved
+
+        return self.__lookup_table.get(key, default)
+
+    def __len__(self) -> int:
+        return len(self.__lookup_table)
+
+    def clear(self) -> None:
+        self.__lookup_table.clear()
+
+    def delete(self, symbol: str) -> bool:
+        if symbol.lower() in SymbolTable.__RESERVED:
+            return False
+
+        val = self.__lookup_table.get(symbol)
+        if val is None:
+            return False
+
+        self.__lookup_table.__delitem__(symbol)
+        return True
